@@ -1,37 +1,43 @@
 from fastapi import FastAPI, Request
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
-# ---------- APP ----------
-app = FastAPI(title="Memory AI Project")
+app = FastAPI()
 
-# ---------- TEMPLATES ----------
-templates = Jinja2Templates(directory="templates")
+# ------------------ CORS ------------------
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
-# ---------- WEBSITE (HOME PAGE) ----------
+# ------------------ Templates ------------------
+templates = Jinja2Templates(directory=".")
+
+# ------------------ Home Page ------------------
 @app.get("/", response_class=HTMLResponse)
-def home(request: Request):
-    return templates.TemplateResponse(
-        "index.html",
-        {"request": request}
-    )
+async def home(request: Request):
+    return templates.TemplateResponse("index.html", {"request": request})
 
-# ---------- SIMPLE API (CHECK) ----------
-@app.get("/health")
-def health():
-    return {
-        "status": "API is running successfully",
-        "message": "Memory AI backend is live 🚀"
-    }
-
-# ---------- SAMPLE CHAT API ----------
+# ------------------ Chat API ------------------
 @app.post("/chat")
-def chat(data: dict):
-    user_id = data.get("user_id")
-    message = data.get("message")
+async def chat(request: Request):
+    data = await request.json()
+    user_message = data.get("message", "")
 
-    return {
-        "user_id": user_id,
-        "message": message,
-        "response": "This is a demo response from Memory AI"
-    }
+    if not user_message:
+        return JSONResponse({"reply": "Please type something"}, status_code=400)
+
+    # Demo AI response (later real AI add pannalaam)
+    reply = f"This is a demo response from Memory AI. You said: {user_message}"
+
+    return {"reply": reply}
+
+# ------------------ Health Check ------------------
+@app.get("/health")
+async def health():
+    return {"status": "ok"}
