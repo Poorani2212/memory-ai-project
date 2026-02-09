@@ -1,64 +1,116 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Memory AI Project</title>
+    <meta charset="UTF-8">
+    <title>Memory AI Chat</title>
     <style>
         body {
-            font-family: Arial;
+            font-family: Arial, sans-serif;
             background: #0f172a;
             color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .chat-box {
+            background: #020617;
+            padding: 20px;
+            border-radius: 10px;
+            width: 350px;
+            box-shadow: 0 0 10px #000;
+        }
+
+        h2 {
             text-align: center;
-            padding-top: 60px;
+            margin-bottom: 15px;
         }
-        input, button {
+
+        input {
+            width: 100%;
             padding: 10px;
-            width: 300px;
-            margin: 5px;
-            border-radius: 6px;
+            border-radius: 5px;
             border: none;
+            margin-bottom: 10px;
+            font-size: 14px;
         }
+
         button {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
             background: #22c55e;
+            color: black;
             font-weight: bold;
             cursor: pointer;
         }
-        #output {
-            margin-top: 30px;
-            font-size: 18px;
-            color: #38bdf8;
+
+        button:hover {
+            background: #16a34a;
+        }
+
+        #response {
+            margin-top: 15px;
+            background: #020617;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 14px;
+            min-height: 40px;
         }
     </style>
 </head>
 
 <body>
-    <h1>🚀 Memory AI Chat</h1>
 
-    <input id="message" placeholder="Type something to remember..." />
-    <br>
+<div class="chat-box">
+    <h2>🧠 Memory AI Chat</h2>
+
+    <input
+        type="text"
+        id="message"
+        placeholder="Type your message..."
+    />
+
     <button onclick="sendMessage()">Send</button>
 
-    <div id="output"></div>
+    <div id="response"></div>
+</div>
 
-    <script>
-        async function sendMessage() {
-            const msg = document.getElementById("message").value;
+<script>
+async function sendMessage() {
+    const input = document.getElementById("message");
+    const message = input.value;
 
-            const res = await fetch("/chat", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    user_id: "user_1",
-                    message: msg
-                })
-            });
+    if (message.trim() === "") {
+        alert("Message type pannunga");
+        return;
+    }
 
-            const data = await res.json();
+    try {
+        const res = await fetch("/chat", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                user_id: "user_1",
+                message: message
+            })
+        });
 
-            document.getElementById("output").innerHTML =
-                "💬 AI Response: <br><b>" + data.response + "</b>";
-        }
-    </script>
+        const data = await res.json();
+        document.getElementById("response").innerText =
+            data.response || JSON.stringify(data, null, 2);
+
+        input.value = "";
+    } catch (error) {
+        document.getElementById("response").innerText =
+            "Error: Backend connect aagala";
+    }
+}
+</script>
+
 </body>
 </html>
