@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Memory AI Project</title>
+    <style>
+        body {
+            font-family: Arial;
+            background: #0f172a;
+            color: white;
+            text-align: center;
+            padding-top: 60px;
+        }
+        input, button {
+            padding: 10px;
+            width: 300px;
+            margin: 5px;
+            border-radius: 6px;
+            border: none;
+        }
+        button {
+            background: #22c55e;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        #output {
+            margin-top: 30px;
+            font-size: 18px;
+            color: #38bdf8;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>🚀 Memory AI Chat</h1>
+
+    <input id="message" placeholder="Type something to remember..." />
+    <br>
+    <button onclick="sendMessage()">Send</button>
+
+    <div id="output"></div>
+
+    <script>
+        async function sendMessage() {
+            const msg = document.getElementById("message").value;
+
+            const res = await fetch("/chat", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    user_id: "user_1",
+                    message: msg
+                })
+            });
+
+            const data = await res.json();
+
+            document.getElementById("output").innerHTML =
+                "💬 AI Response: <br><b>" + data.response + "</b>";
+        }
+    </script>
+</body>
+</html>
