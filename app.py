@@ -1,43 +1,54 @@
 from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse, JSONResponse
-from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from fastapi.templating import Jinja2Templates
+from pydantic import BaseModel
 
 app = FastAPI()
 
-# ------------------ CORS ------------------
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+# -----------------------------
+# Simple in-memory storage
+# -----------------------------
+memory = []
 
-# ------------------ Templates ------------------
-templates = Jinja2Templates(directory=".")
+# -----------------------------
+# Request model
+# -----------------------------
+class ChatRequest(BaseModel):
+    message: str
 
-# ------------------ Home Page ------------------
+
+# -----------------------------
+# Home page (index.html)
+# -----------------------------
 @app.get("/", response_class=HTMLResponse)
-async def home(request: Request):
-    return templates.TemplateResponse("index.html", {"request": request})
+async def home():
+    with open("index.html", "r", encoding="utf-8") as f:
+        return f.read()
 
-# ------------------ Chat API ------------------
+
+# -----------------------------
+# Chat API
+# -----------------------------
 @app.post("/chat")
-async def chat(request: Request):
-    data = await request.json()
-    user_message = data.get("message", "")
+async def chat(req: ChatRequest):
+    user_msg = req.message
 
-    if not user_message:
-        return JSONResponse({"reply": "Please type something"}, status_code=400)
+    # store memory
+    memory.append(user_msg)
 
-    # Demo AI response (later real AI add pannalaam)
-    reply = f"This is a demo response from Memory AI. You said: {user_message}"
+    # demo AI response (later real AI connect pannalam)
+    reply = f"I remember you said: {user_msg}"
 
-    return {"reply": reply}
+    return {
+        "response": reply,
+        "memory_count": len(memory)
+    }
 
-# ------------------ Health Check ------------------
+
+# -----------------------------
+# Health check (optional)
+# -----------------------------
 @app.get("/health")
 async def health():
     return {"status": "ok"}
+
